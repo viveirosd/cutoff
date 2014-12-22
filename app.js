@@ -25,7 +25,6 @@ app.listen(port, function () {
 });
 
 
-//mongoose.connect('mongodb://cutoffuser:cutoffpasswd@ds027771.mongolab.com:27771/cutoff');
 mongoose.connect('mongodb://localhost:27017/mainDB');
 var db = mongoose.connection;
 db.on('error', function callback () {
