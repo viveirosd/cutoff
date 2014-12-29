@@ -22,16 +22,19 @@ var send_grid = {
 var mailer = nodemailer.createTransport(sgTransport(send_grid));
 mailer.use('compile', hbsMailer(options));
 
+
 //sends the email using sendgrid or reports an error to the console
-var handleSendMail = function() {
+var handleSendMail = function(user, relationship, expenditure) {
   mailer.sendMail({
-    from: 'cutoff@cutoff.com',
-    to: 'viveirosd@gmail.com',
-    subject: 'Any Subject',
+    from: user.email,
+    to: relationship.relationshipEmail,
+    subject: ('YOU ARE CUTOFF ' + relationship.relationshipType + '!!!').toUpperCase(),
     template: 'emailcontent',
     context: {
-      variable1 : 'value1',
-      variable2 : 'value2'
+      amount : expenditure.amount,
+      date : expenditure.expenditureDate,
+      expensedesc: expenditure.expenditureDesc,
+      category: relationship.threshold
     }
   }, function (error, response) {
     if (error) {
@@ -47,7 +50,10 @@ var data = require('../models/data');
 
 
 exports.cutoffdisplay = function(req, res) {
-  res.render('cutoffform');
+  res.render('cutoffform', {
+    relationship: data.relationshipValues,
+    category: data.expenseCategoryValues
+  });
 };
 
 exports.cutoffnotification = function(req, res) {
@@ -57,22 +63,34 @@ exports.cutoffnotification = function(req, res) {
     expenditureDesc: req.param('expensedesc'),
     expenditureDate: new Date(req.param('date'))
   });
-  console.log(expenditure);
+  //console.log(expenditure);
   expenditure.save(function (err) {
     if (err) return console.error(err);
   });
 
   //save the relationship
-  var relationship = new data.Relationship({   
+  var relationship = new data.Relationship({
     relationshipEmail: req.param('spenderemail'),
     relationshipType: req.param('relationship'),
     threshold: req.param('category'),
     expenditure: expenditure
   });
-  console.log(relationship);
+  //console.log(relationship);
   relationship.save(function (err) {
     if (err) return console.error(err);
   });
 
+  //save the user
+  var user = new data.User({
+    email: req.param('email'),
+    password: "default",
+    relation: relationship
+  });
+  //console.log(user);
+  user.save(function (err) {
+    if (err) return console.error(err);
+  });
+
+  //handleSendMail(user, relationship, expenditure);
 	res.render('emailsent');
 };

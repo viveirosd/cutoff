@@ -8,7 +8,6 @@ var expenseCategory = [
 ];
 
 var relationship = [
-   "none",
    "wife",
    "husband",
    "boyfriend",
@@ -40,3 +39,5 @@ var ExpenditureSchema = mongoose.Schema({
 exports.User = mongoose.model('User', UserSchema);
 exports.Relationship = mongoose.model('Relationship', RelationshipSchema);
 exports.Expenditure = mongoose.model('Expenditure', ExpenditureSchema);
+exports.relationshipValues = relationship;
+exports.expenseCategoryValues = expenseCategory;
